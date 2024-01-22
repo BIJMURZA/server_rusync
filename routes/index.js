@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const pool = require('./postgres_rusync')
 
+/**
+ * @param {{aid:string}} req
+ */
+
 router.get('/:aid', async (req, res) => {
   const markets = ['steam', 'steampay', 'steambuy', 'gamerz', 'game_mag', 'zaka_zaka', 'gabestore'];
   const aid = req.params.aid;
