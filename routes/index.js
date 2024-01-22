@@ -2,20 +2,17 @@ const express = require('express');
 const router = express.Router();
 const pool = require('./postgres_rusync')
 
-router.get('/data/:price', async (req, res) => {
-  let whiteMarketplaces = ['steam', 'steampay', 'steambuy', 'gamerz', 'game_mag', 'zaka_zaka', 'gabestore'];
+router.get('/:aid', async (req, res) => {
+  const markets = ['steam', 'steampay', 'steambuy', 'gamerz', 'game_mag', 'zaka_zaka', 'gabestore'];
+  const aid = req.params.aid;
   const allData = [];
 
-  for (const marketplace of whiteMarketplaces) {
-    try {
-      const query = `SELECT game_name, price FROM ${marketplace};`;
-      const {rows} = await pool.query(query);
-      allData.push(rows);
-      console.log(marketplace)
-    } catch (err) {
-      console.error("Ошибка запроса к базе данных:", err);
-      res.status(500).send(err.message);
-    }
+  for (const market of markets) {
+    const query = `SELECT price FROM ${market} WHERE aid = $1`;
+    const { rows } = await pool.query(query, [aid]);
+    const price = rows.map(row => row.price)
+    allData.push({market, price});
+    console.log(markets, price)
   }
   res.json(allData);
 });
