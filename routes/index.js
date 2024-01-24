@@ -12,11 +12,12 @@ router.get('/:aid', async (req, res) => {
   const allData = [];
 
   for (const market of markets) {
-    const query = `SELECT price FROM ${market} WHERE aid = $1`;
+    const query = `SELECT game_name, price FROM ${market} WHERE aid = $1`;
     const { rows } = await pool.query(query, [aid]);
+    const game = rows.map(row => row.game_name)
     const price = rows.map(row => row.price)
-    allData.push({market, price});
-    console.log(markets, price)
+    allData.push({market, price, game});
+    console.log(markets, price, game)
   }
   res.json(allData);
 });
