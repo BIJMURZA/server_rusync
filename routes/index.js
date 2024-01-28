@@ -7,10 +7,13 @@ const pool = require('./postgres_rusync')
  */
 
 router.get('/games', async(req, res) => {
-  const query = `SELECT game_name FROM games;`
+  const query = `SELECT aid, game_name FROM games;`
   const { rows } = await pool.query(query);
-  const games = rows.map(row => ({ game: row.game_name }));
-  res.json({games, count_games: rows.length})
+  const games = rows.map(row => ({
+    aid: row.aid,
+    game_name: row.game_name
+  }));
+  res.json({games})
 });
 
 router.get('/:aid', async (req, res) => {
