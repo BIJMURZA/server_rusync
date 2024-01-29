@@ -7,12 +7,34 @@ const pool = require('./postgres_rusync')
  */
 
 router.get('/games', async(req, res) => {
+  const markets = ['steam', 'steampay', 'steambuy', 'gamerz', 'game_mag', 'zaka_zaka', 'gabestore'];
   const query = `SELECT aid, game_name FROM games;`
   const { rows } = await pool.query(query);
-  const games = rows.map(row => ({
-    aid: row.aid,
-    game_name: row.game_name
-  }));
+  const games = [];
+  for (let row of rows) {
+   let minPrice = null;
+   for (let market of markets) {
+     const priceQuery = `SELECT price FROM ${market} WHERE aid = $1 AND price <> 'Нет в наличии'`
+     const price = await pool.query(priceQuery, [row.aid]);
+
+     const intPrice = price.rows
+         .map(row => row.price)
+         .filter(price => !isNaN(price))
+         .map(Number)
+
+     if (intPrice.length > 0) {
+       const minMarketPrice = Math.min(...price.rows.map(row => row.price));
+       if (minPrice === null || minMarketPrice < minPrice) {
+         minPrice = minMarketPrice;
+       }
+     }
+   }
+    games.push({
+      aid: row.aid,
+      game_name: row.game_name,
+      minPrice: minPrice,
+    });
+  }
   res.json({games})
 });
 
