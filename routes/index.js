@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('./postgres_rusync')
-
 /**
- * @param {{aid:string}} req
+ * @param {{aid:string, login: string, password: string}} req
  */
 
 router.get('/games', async(req, res) => {
@@ -37,6 +36,19 @@ router.get('/games', async(req, res) => {
   }
   res.json({games})
 });
+
+router.post('/accounts/login/password', async(req, res) => {
+  const query = `SELECT * FROM accounts WHERE login = $1 AND password = $2`;
+  const {login, password} = req.body;
+  const { rows } = await pool.query(query, [login, password])
+  console.log({rows})
+  console.log(rows[0])
+  if (rows.length > 0) {
+    res.json({ success: true, user: rows });
+  } else {
+    res.status(401).json({ success: false, message: 'Неверный логин или пароль' });
+  }
+})
 
 router.get('/:aid', async (req, res) => {
   const markets = ['steam', 'steampay', 'steambuy', 'gamerz', 'game_mag', 'zaka_zaka', 'gabestore'];

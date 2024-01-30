@@ -7,6 +7,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const cors = require('cors')
 const app = express();
+app.use(express.static('public'))
 app.use('/api', indexRouter);
 app.use(cors())
 app.use(logger('dev'));
